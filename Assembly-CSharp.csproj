@@ -61,6 +61,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Clone.cs" />
     <Compile Include="Assets\Scenes\GameBehavior.cs" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>C:/Users/willi/Desktop/UnityProjects/Blocks/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>

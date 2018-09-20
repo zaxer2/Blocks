@@ -2,22 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.UI;
 
 public class GameBehavior : MonoBehaviour {
 
-    int[,] gameTable = new int[10, 10];
+    int[,] gameTable = new int[9, 9];
 
-    GameObject[,] objectTable = new GameObject[10, 10];
+    GameObject[,] objectTable = new GameObject[9, 9];
 
     public GameObject block;
-
-    public int score;
 
     public Material red;
     public Material blue;
     public Material green;
     public Material purple;
     public Material yellow;
+
+    public TextMesh gameScore;
+    public TextMesh gameHiScore;
+    public GameObject resetButton;
+
+    public int score;
+    public int hiScore;
+    public bool gameState = false;
+    private float startTime;
 
     // Use this for initialization
     void Start() { 
@@ -26,9 +34,9 @@ public class GameBehavior : MonoBehaviour {
         {
             for (int j = 1; j < gameTable.GetLength(1) - 1; j++)
             {
-                gameTable[i, j] = rand.Next(1, 5);
+                gameTable[i, j] = rand.Next(1, 6);
 
-                GameObject thisPlane = PrefabUtility.InstantiatePrefab(block) as GameObject;
+                GameObject thisPlane = GameObject.Instantiate(block) as GameObject;
 
                 objectTable[i, j] = thisPlane;
 
@@ -54,14 +62,31 @@ public class GameBehavior : MonoBehaviour {
                 }
             }
         }
-        printTable();
+        //printTable();
 
     }
 
     // Update is called once per frame
     void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
+    {   if (!gameState)
+        {
+            for (int i = 1; i < gameTable.GetLength(0) - 1; i++)
+            {
+                for (int j = 1; j < gameTable.GetLength(1) - 1; j++)
+                {
+                    if ((i + j) / 10.0f < Time.time - startTime && !objectTable[i, j].GetComponent<Clone>().flipped)
+                    {
+                        objectTable[i, j].GetComponent<Clone>().startRotation();
+                    }
+                }
+            }
+
+            if (Time.time - startTime > (gameTable.GetLength(0) + gameTable.GetLength(1) - 4) * 0.1 + 1)
+            {
+                gameState = true;
+            }
+        }
+        if (Input.GetMouseButtonDown(0) && gameState)
         {
             int[] tI = findHitObject();
             if (tI != null)
@@ -88,7 +113,9 @@ public class GameBehavior : MonoBehaviour {
                 }
 
                 score += (numOfBlocks - 2) * Mathf.Abs(numOfBlocks - 2);
-                print("score: " + score);
+                gameScore.text = "Score: " + score;
+                
+                
 
                 for (int k = 1; k < gameTable.GetLength(0) - 1; k++)
                 {
@@ -125,6 +152,22 @@ public class GameBehavior : MonoBehaviour {
                             moveDownByOneStartingAt(i);
                         }
                     }
+                }
+                bool gameOver = true;
+                for (int i = 1; i < gameTable.GetLength(1) - 1; i++)
+                {
+                    for (int j = 1; j < gameTable.GetLength(1) - 1; j++)
+                    {
+                        if (gameTable[i, j] != -1)
+                        {
+                            gameOver = false;
+                        }
+                    }
+                }
+                if (score > hiScore && gameOver)
+                {
+                    hiScore = score;
+                    gameHiScore.text = "Highscore: " + hiScore;
                 }
             }
         }
@@ -185,6 +228,11 @@ public class GameBehavior : MonoBehaviour {
 
         if (Physics.Raycast(mousePos, Vector3.forward, out hit, Mathf.Infinity))
         {
+            if (hit.collider.gameObject == resetButton)
+            {
+                resetGame();
+                return null;
+            }
             for (int i = 1; i < gameTable.GetLength(0) - 1; i++)
             {
                 for (int j = 1; j < gameTable.GetLength(1) - 1; j++)
@@ -201,6 +249,7 @@ public class GameBehavior : MonoBehaviour {
         }
         return null;
     }
+
     private void moveDownByOneStartingAt(int index)
     {
         for (int i = index + 1; i < gameTable.GetLength(1) - 1; i++)
@@ -217,6 +266,49 @@ public class GameBehavior : MonoBehaviour {
                 objectTable[i - 1, j] = objectTable[i, j];
                 objectTable[i, j] = null;
 
+            }
+        }
+    }
+
+    private void resetGame()
+    {
+        score = 0;
+        gameScore.text = "Score: " + score;
+        startTime = Time.time;
+        gameState = false;
+        System.Random rand = new System.Random();
+        for (int i = 1; i < gameTable.GetLength(0) - 1; i++)
+        {
+            for (int j = 1; j < gameTable.GetLength(1) - 1; j++)
+            {
+                gameTable[i, j] = rand.Next(1, 6);
+
+                GameObject.Destroy(objectTable[i, j]);
+
+                GameObject thisPlane = GameObject.Instantiate(block) as GameObject;
+
+                objectTable[i, j] = thisPlane;
+
+                thisPlane.transform.position = new Vector3(i * 10, j * 10, 0);
+
+                switch (gameTable[i, j])
+                {
+                    case 1:
+                        thisPlane.GetComponent<Renderer>().material = red;
+                        break;
+                    case 2:
+                        thisPlane.GetComponent<Renderer>().material = blue;
+                        break;
+                    case 3:
+                        thisPlane.GetComponent<Renderer>().material = green;
+                        break;
+                    case 4:
+                        thisPlane.GetComponent<Renderer>().material = purple;
+                        break;
+                    case 5:
+                        thisPlane.GetComponent<Renderer>().material = yellow;
+                        break;
+                }
             }
         }
     }
