@@ -62,7 +62,7 @@ public class GameBehavior : MonoBehaviour {
                 }
             }
         }
-        //printTable();
+       //printTable();
 
     }
 
@@ -101,11 +101,11 @@ public class GameBehavior : MonoBehaviour {
                 int numOfBlocks = 0;
                 while (consumed.Count > 0)
                 {
-                    numOfBlocks++;
+                    
                     tI = consumed.Dequeue();
                     if (gameTable[tI[0], tI[1]] != -1)
                     {
-
+                        numOfBlocks++;
 
                         if (gameTable[tI[0], tI[1] + 1] == gameTable[tI[0], tI[1]]) { int[] up = { tI[0], tI[1] + 1 }; consumed.Enqueue(up); }
                         if (gameTable[tI[0], tI[1] - 1] == gameTable[tI[0], tI[1]]) { int[] dn = { tI[0], tI[1] - 1 }; consumed.Enqueue(dn); }
