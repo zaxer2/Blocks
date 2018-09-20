@@ -68,7 +68,12 @@ public class GameBehavior : MonoBehaviour {
 
     // Update is called once per frame
     void Update()
-    {   if (!gameState)
+    {
+        if (Input.GetKey("escape"))
+        {
+            Application.Quit();
+        }
+        if (!gameState)
         {
             for (int i = 1; i < gameTable.GetLength(0) - 1; i++)
             {
